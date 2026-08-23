@@ -72,13 +72,35 @@
   nav.links{display:flex; gap:22px; font-family:var(--mono); font-size:13px; color:var(--text-dim);}
   nav.links a{text-decoration:none; transition:color 0.15s;}
   nav.links a:hover{color:var(--amber);}
+  .resume-dl{position:relative;}
   .resume-btn{
     font-family:var(--mono); font-size:12.5px; text-decoration:none;
-    border:1px solid var(--panel-border-hi); color:var(--text);
-    padding:7px 13px; border-radius:6px; white-space:nowrap;
+    border:1px solid var(--panel-border-hi); color:var(--text); background:transparent;
+    padding:8px 14px; border-radius:6px; white-space:nowrap; cursor:pointer;
+    display:inline-flex; align-items:center; gap:7px;
     transition:border-color 0.15s, color 0.15s;
   }
   .resume-btn:hover{border-color:var(--amber); color:var(--amber);}
+  .resume-btn .caret{font-size:9px; transition:transform 0.15s;}
+  .resume-btn[aria-expanded="true"] .caret{transform:rotate(180deg);}
+  .resume-menu{
+    position:absolute; top:calc(100% + 8px); right:0; z-index:60;
+    background:var(--panel); border:1px solid var(--panel-border-hi); border-radius:8px;
+    overflow:hidden; min-width:190px;
+    box-shadow:0 16px 34px -14px rgba(0,0,0,0.7);
+    opacity:0; transform:translateY(-6px); pointer-events:none;
+    transition:opacity 0.15s, transform 0.15s;
+  }
+  .resume-menu.open{opacity:1; transform:translateY(0); pointer-events:auto;}
+  .resume-menu a{
+    display:flex; align-items:center; gap:9px;
+    padding:11px 14px; font-family:var(--mono); font-size:12.5px; color:var(--text);
+    text-decoration:none; border-bottom:1px solid var(--panel-border);
+  }
+  .resume-menu a:last-child{border-bottom:none;}
+  .resume-menu a:hover{background:rgba(242,169,59,0.1); color:var(--amber);}
+  .resume-menu .flag{font-size:15px;}
+  @media(max-width:520px){ .resume-btn span.full{display:none;} }
   @media(max-width:720px){ nav.links{display:none;} }
 
   /* ---------- HERO / TERMINAL ---------- */
@@ -292,7 +314,13 @@
       <a href="#education">~/education</a>
       <a href="#contact">~/contact</a>
     </nav>
-    <a class="resume-btn" href="Mohan_Balaji_Resume.pdf" download>↓ resume.pdf</a>
+    <div class="resume-dl">
+      <button class="resume-btn" id="resumeBtn" type="button" aria-haspopup="true" aria-expanded="false">↓ <span class="full">Resume</span> <span class="caret">▾</span></button>
+      <div class="resume-menu" id="resumeMenu" role="menu">
+        <a href="Mohan_Balaji_Resume_EN.pdf" download="Mohan_Balaji_Resume_EN.pdf" role="menuitem"><span class="flag">🇬🇧</span> English</a>
+        <a href="Mohan_Balaji_Resume_FR.pdf" download="Mohan_Balaji_Resume_FR.pdf" role="menuitem"><span class="flag">🇫🇷</span> Français</a>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -566,6 +594,30 @@
 
 <script>
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  const resumeBtn = document.getElementById('resumeBtn');
+  const resumeMenu = document.getElementById('resumeMenu');
+  if (resumeBtn && resumeMenu) {
+    function closeMenu(){
+      resumeMenu.classList.remove('open');
+      resumeBtn.setAttribute('aria-expanded', 'false');
+    }
+    function openMenu(){
+      resumeMenu.classList.add('open');
+      resumeBtn.setAttribute('aria-expanded', 'true');
+    }
+    resumeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resumeMenu.classList.contains('open') ? closeMenu() : openMenu();
+    });
+    document.addEventListener('click', (e) => {
+      if (!resumeMenu.contains(e.target) && e.target !== resumeBtn) closeMenu();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeMenu();
+    });
+    resumeMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
+  }
 
   const roles = ['production data pipelines.', 'ML systems that ship.', 'tools people actually use.'];
   const el = document.getElementById('typeCycle');
